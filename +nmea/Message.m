@@ -15,6 +15,7 @@ classdef Message < matlab.mixin.Heterogeneous
 %
 % Message methods (static):
 %   get_all_messages - returns all available NMEA messages
+%   parse_all - parse nmea data
 %
 % Message abstract methods:
 %
@@ -202,6 +203,17 @@ classdef Message < matlab.mixin.Heterogeneous
               nmea.SPDMessage;...
               nmea.ROTMessage;...
               nmea.INFMessage];
+        end
+        function val=parse_all(str)
+% Parse string data using all available messages
+%
+%   dat=nmea.Message.parse_all(str) reads all known messages in the given
+%   string or cell of character arrays and returns the data available per
+%   message.
+%
+%   see also: nmea, Message, parse
+           msgs=nmea.Message.get_all_messages();
+           val=msgs.parse(str);
         end
     end
 end
