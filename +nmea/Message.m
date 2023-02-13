@@ -1,4 +1,4 @@
-classdef Message < matlab.mixin.Heterogeneous
+classdef Message < matlab.mixin.Heterogeneous & handle
 % Generic NMEA messages class. This is an abstract class that is used to
 % define NMEA messages and cannot be used directly, apart from the static
 % method get_all_messages.
