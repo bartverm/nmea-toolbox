@@ -25,14 +25,15 @@ classdef SPDMessage < nmea.Message
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
 
-    methods (Static, Access=protected)
-        function val=name_static()
-            val='SPD';
-        end
-        function val=fields_static()
-            val=[nmea.Field('x_vel',"%f32"), ...
-                 nmea.Field('y_vel', "%f32"),...
-                 nmea.Field('z_vel', "%f32")];
+    methods 
+        function obj=SPDMessage()
+            obj.name = 'SPD';
+            obj.msg_id_pattern = obj.name;
+            cp = nmea.Field.common_patterns;
+            obj.fields = [
+                nmea.Field('x_vel', "%f32", cp.float), ...
+                nmea.Field('y_vel', "%f32", cp.float),...
+                nmea.Field('z_vel', "%f32", cp.float)];
         end
     end
 end

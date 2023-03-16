@@ -25,14 +25,14 @@ classdef LINMessage < nmea.Message
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
 
-    methods (Static, Access=protected)
-        function val=name_static()
-            val='LIN';
-        end
-        function val=fields_static()
-            val=[nmea.Field('surge_x',"%f32"), ...
-                 nmea.Field('sway_y', "%f32"),...
-                 nmea.Field('heave_z', "%f32")];
+    methods
+        function obj=LINMessage()
+            obj.name='LIN';
+            obj.msg_id_pattern = obj.name;
+            cp = nmea.Field.common_patterns;
+            obj.fields=[nmea.Field('surge_x',"%f32", cp.float), ...
+                 nmea.Field('sway_y', "%f32", cp.float),...
+                 nmea.Field('heave_z', "%f32", cp.float)];
         end
     end
 end

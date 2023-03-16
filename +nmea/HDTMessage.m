@@ -23,12 +23,14 @@ classdef HDTMessage < nmea.Message
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
 
-    methods (Static, Access=protected)
-        function val=name_static()
-            val='HDT';
-        end
-        function val=fields_static()
-            val=nmea.Field('heading', "%f32 T");
+    methods
+        function obj=HDTMessage()
+            obj.name='HDT';
+            obj.msg_id_pattern = obj.name;
+            cp = nmea.Field.common_patterns;
+            obj.fields = [
+                nmea.Field('heading', "%f32", cp.float),...
+                nmea.SkipField("T")];
         end
     end
 end

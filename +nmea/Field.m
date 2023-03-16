@@ -1,4 +1,4 @@
-classdef Field < handle
+classdef Field < handle & matlab.mixin.Heterogeneous
 % Defines a NMEA field in a NMEA message
 %
 %   Field properties:
@@ -34,7 +34,17 @@ classdef Field < handle
 %     You should have received a copy of the GNU General Public License
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
-
+    properties(Constant)
+        common_patterns = struct(...
+        "float",'(?:\-?\d*\.?\d*)?',... optional minus, one or more digits,0 or 1 dot,0 or more digits 
+        "time",'(?:\d{6}\.?\d*)?',... six digits, 0 or 1 dot, 0 or more digits
+        "nhex",@(n) ['[a-fA-F0-9]{',num2str(n),'}'],... %any of a to f, A to F, 0 to 9, n times
+        "nchr",@(n) ['(?:[a-zA-Z]{',num2str(n),'})?'],... %any of a to z, A to Z, n times
+        "ndgt",@(n) ['(?:\-?\d{0,',num2str(n),'})?'],... %optional minus and any of 0-9, n times
+        "status",'[AV]?',... % A or V
+        "lat",'(?:\d{4}\.?\d*)?,[NS]?',... %four digits, 0 or 1 dot, 0 or mor digits, N or S
+        "long",'(?:\d{5}\.?\d*)?,[EW]?') %four digits, 0 or 1 dot, 0 or mor digits, E or W
+    end
 
     properties
         % nmea.Field/name property
@@ -53,6 +63,8 @@ classdef Field < handle
         %
         %   see also: nmea, nmea.Field, nmea.Message, textscan
         format (1,:) string = "%s"
+
+        pattern (1,:) string = ""
         
         % nmea.Field/post_process property
         %
@@ -63,7 +75,7 @@ classdef Field < handle
         %   @nmea.Field.default_postproc
         %
         %   see also: nmea, nmea.Field, nmea.Field.default_postproc
-        post_process (1,:) function_handle = @nmea.Field.default_postproc
+        post_process (1,1) function_handle = @nmea.Field.default_postproc
     end
     properties (Dependent, SetAccess = private)
         % nmea.Field/n_formats dependent, read only property
@@ -74,21 +86,34 @@ classdef Field < handle
         %
         %   see also: nmea, format, nmea.Field
         n_formats
+
+        named_pattern
     end
     methods
-        function obj = Field(varargin)
+        function obj = Field(name, format, pattern, post_process)
             if nargin > 0
-                obj.name=varargin{1};
+                obj.name = name;
             end
             if nargin > 1
-                obj.format=varargin{2};
+                obj.format = format;
             end
             if nargin > 2
-                obj.post_process=varargin{3};
+                obj.pattern = pattern;
+            end
+            if nargin > 3
+                obj.post_process = post_process;
             end
         end
         function val=get.n_formats(obj)
             val=numel(obj.format);
+        end
+        function val = get.named_pattern(obj)
+            val = obj.get_named_pattern;
+        end
+    end
+    methods(Access = protected)
+        function val = get_named_pattern(obj)
+            val = "(?<" + obj.name + ">" + obj.pattern + ")";
         end
     end
     methods(Static)
@@ -106,27 +131,7 @@ classdef Field < handle
                 out=in;
             end
         end
-        function out=latlong_postproc(in)
-% Returns latitude and longitude in signed decimal degrees
-%
-%   out=latlong_postproc(in) given the two element cell in, computes the
-%   latitude and longitude in decimal degrees. Latitude and longitude are
-%   returned negative for South latitude and East longitudes.
-%
-%   see also: nmea, nmea.Field, latlong_postproc, utc_postproc,
-%   mode_postproc
-            out=((in{3}=='N' | in{3}=='W')*2-1).*(in{1}+in{2}/60);
-        end
-        function out=utc_postproc(in)
-% Returns Nx3 UTC time with hours, minutes, days
-%
-%    out = utc_postproc(in) concatenates horizontally the three elements in
-%    the input cell
-%
-%   see also: nmea, nmea.Field, latlong_postproc, utc_postproc,
-%   mode_postproc
-            out=[in{:}];
-        end
+
         function out=mode_postproc(in)
 % Returns GPSMode array from string input representing the GPS mode
 %

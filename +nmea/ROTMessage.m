@@ -25,14 +25,15 @@ classdef ROTMessage < nmea.Message
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
 
-    methods (Static, Access=protected)
-        function val=name_static()
-            val='ROT';
-        end
-        function val=fields_static()
-            val=[nmea.Field('x_rot',"%f32"), ...
-                 nmea.Field('y_rot', "%f32"),...
-                 nmea.Field('z_rot', "%f32")];
+    methods 
+        function obj=ROTMessage()
+            obj.name = 'ROT';
+            obj.msg_id_pattern = obj.name;
+            cp = nmea.Field.common_patterns;
+            obj.fields=[
+                 nmea.Field('x_rot', "%f32", cp.float), ...
+                 nmea.Field('y_rot', "%f32", cp.float),...
+                 nmea.Field('z_rot', "%f32", cp.float)];
         end
     end
 end

@@ -23,19 +23,32 @@ classdef ZDAMessage < nmea.Message
 %     You should have received a copy of the GNU General Public License
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
-methods (Static, Access=protected)
-        function val=name_static()
-            val='ZDA';
+    methods
+        function obj = ZDAMessage()
+            obj.name='ZDA';
+            obj.msg_id_pattern = obj.name;
+            cp = nmea.Field.common_patterns;
+            obj.fields = nmea.Field('datetime',...
+                ["%2f32" "%2f32" "%f32" "%2u16" "%2u16",...
+                "%4u16" "%2d8" "%2u8"],...
+                cp.time + "," + ...
+                cp.ndgt(2) + "," + cp.ndgt(2) + "," + cp.ndgt(4) + "," + ...
+                cp.ndgt(2) + "," + cp.ndgt(2),...
+                @nmea.ZDAMessage.datetime_postproc);
         end
-        function val=fields_static()
-            val=nmea.Field('datetime', ["%2f32" "%2f32" "%f32" "%2u16" "%2u16" "%4u16" "%2d8" "%2u8"],@nmea.ZDAMessage.datetime_postproc);
-        end
+    end
+
+    methods (Static, Access=protected)
         function out=datetime_postproc(in)
-            tzone=unique(reshape(sprintf('%+03d%02u',in{7},in{8}),5,[])','rows');
+            tzone=unique(reshape(sprintf('%+03d%02u',...
+                in{7},in{8}),5,[])','rows');
             if size(tzone,1)>1
-                warning(['Timezone changing in ZDA data, using:', tzone(1,:)])
+                warning(['Timezone changing in ZDA data, using:',...
+                    tzone(1,:)])
             end
-            out=datetime(in{6}, in{5}, in{4}, in{1}, in{2}, in{3},'Timezone',tzone(1,:));
+            out=datetime(in{6}, in{5}, in{4}, in{1}, in{2}, in{3},...
+                'Timezone',tzone(1,:));
         end
     end
 end
+

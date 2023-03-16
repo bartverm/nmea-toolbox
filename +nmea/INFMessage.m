@@ -23,12 +23,11 @@ classdef INFMessage < nmea.Message
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
 
-    methods (Static, Access=protected)
-        function val=name_static()
-            val='INF';
-        end
-        function val=fields_static()
-            val=nmea.Field('octans_status',"%s");
+    methods
+        function obj=INFMessage()
+            obj.name='INF';
+            obj.msg_id_pattern = obj.name;
+            obj.fields=nmea.Field('octans_status', "%s", "(?:\w*)?");
         end
     end
 end

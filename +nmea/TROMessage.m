@@ -24,14 +24,21 @@ classdef TROMessage < nmea.Message
 %     along with NMEA toolbox.  If not, see <https://www.gnu.org/licenses/>.
 
 
+    methods
+        function obj=TROMessage()
+            obj.name = 'TRO';
+            obj.msg_id_pattern = obj.name;
+            cp = nmea.Field.common_patterns;
+            obj.fields = [
+                nmea.Field('pitch',["%f32", "%s"],...
+                    "(?:" + cp.float + ",\w)?" ,...
+                    @(x) nmea.TROMessage.tilt_postproc(x, 'P')),...
+                nmea.Field('roll',["%f32", "%s"],...
+                    "(?:" + cp.float + ",\w)?" ,...
+                    @(x) nmea.TROMessage.tilt_postproc(x, 'B'))];
+        end
+    end
     methods (Static, Access=protected)
-        function val=name_static()
-            val='TRO';
-        end
-        function val=fields_static()
-            val=[nmea.Field('pitch',["%f32", "%s"],@(x) nmea.TROMessage.tilt_postproc(x, 'P')),...
-                 nmea.Field('roll',["%f32", "%s"],@(x) nmea.TROMessage.tilt_postproc(x, 'B'))];
-        end
         function out=tilt_postproc(in,neg_char)
             out=in{1};
             fneg=strcmp(in{2},neg_char);
